@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ویرایش کالا - Smartwise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-gradient">
+        <div class="container-fluid">
+            <div class="row align-items-center py-3">
+                <div class="col-2">
+                    <a href="index.html" class="btn btn-link text-white p-0">
+                        <i class="bi bi-arrow-right fs-4"></i>
+                    </a>
+                </div>
+                <div class="col-8 text-center">
+                    <h1 class="h5 text-white mb-0 fw-bold">ویرایش کالا</h1>
+                </div>
+                <div class="col-2"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid px-3 py-4">
+        <form id="editProductForm">
+            <!-- Product Name -->
+            <div class="mb-3">
+                <label for="editProductName" class="form-label">نام کالا</label>
+                <input type="text" class="form-control form-input" id="editProductName" value="نمونه محصول" required>
+            </div>
+
+            <!-- Serial Number -->
+            <div class="mb-3">
+                <label for="editSerialNumber" class="form-label">شماره سریال</label>
+                <div class="input-group">
+                    <input type="text" class="form-control form-input" id="editSerialNumber" value="123456789">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="bi bi-qr-code"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quantity -->
+            <div class="mb-3">
+                <label for="editQuantity" class="form-label">مقدار</label>
+                <div class="input-group">
+                    <button class="btn btn-outline-secondary" type="button" id="decreaseQty">
+                        <i class="bi bi-dash"></i>
+                    </button>
+                    <input type="number" class="form-control form-input text-center" id="editQuantity" value="10" min="0">
+                    <button class="btn btn-outline-secondary" type="button" id="increaseQty">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Purchase Price -->
+            <div class="mb-3">
+                <label for="editPurchasePrice" class="form-label">قیمت خرید</label>
+                <div class="input-group">
+                    <input type="number" class="form-control form-input" id="editPurchasePrice" value="100000" min="0">
+                    <span class="input-group-text">تومان</span>
+                </div>
+            </div>
+
+            <!-- Sale Prices -->
+            <div class="mb-3">
+                <label class="form-label">قیمت فروش</label>
+                <div class="price-options">
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="salePrice" id="price1" value="120000" checked>
+                        <label class="form-check-label w-100" for="price1">
+                            <div class="input-group">
+                                <input type="number" class="form-control form-input" value="120000" min="0">
+                                <span class="input-group-text">تومان</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="radio" name="salePrice" id="price2" value="130000">
+                        <label class="form-check-label w-100" for="price2">
+                            <div class="input-group">
+                                <input type="number" class="form-control form-input" value="130000" min="0">
+                                <span class="input-group-text">تومان</span>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="radio" name="salePrice" id="price3" value="140000">
+                        <label class="form-check-label w-100" for="price3">
+                            <div class="input-group">
+                                <input type="number" class="form-control form-input" value="140000" min="0">
+                                <span class="input-group-text">تومان</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Discount -->
+            <div class="mb-3">
+                <label for="discount" class="form-label">درصد تخفیف</label>
+                <div class="input-group">
+                    <button class="btn btn-outline-secondary" type="button" id="decreaseDiscount">
+                        <i class="bi bi-dash"></i>
+                    </button>
+                    <input type="number" class="form-control form-input text-center" id="discount" value="0" min="0" max="100">
+                    <button class="btn btn-outline-secondary" type="button" id="increaseDiscount">
+                        <i class="bi bi-plus"></i>
+                    </button>
+                    <span class="input-group-text">%</span>
+                </div>
+            </div>
+
+            <!-- Final Price Display -->
+            <div class="mb-3">
+                <div class="alert alert-info">
+                    <strong>قیمت فروش نهایی: </strong>
+                    <span id="finalPrice">120,000 تومان</span>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-4">
+                <label for="description" class="form-label">توضیحات</label>
+                <textarea class="form-control form-input" id="description" rows="3" placeholder="توضیحات اضافی..."></textarea>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill">
+                <i class="bi bi-floppy me-2"></i>ذخیره تغییرات
+            </button>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

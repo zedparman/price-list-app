@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لیست قیمت - Smartwise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-gradient">
+        <div class="container-fluid">
+            <div class="row align-items-center py-3">
+                <div class="col-2">
+                    <button class="btn btn-link text-white p-0" data-bs-toggle="offcanvas" data-bs-target="#sideMenu">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                </div>
+                <div class="col-8 text-center">
+                    <h1 class="h5 text-white mb-0 fw-bold">PRICE LIST</h1>
+                </div>
+                <div class="col-2 text-end">
+                    <div class="dropdown">
+                        <button class="btn btn-link text-white p-0" data-bs-toggle="dropdown">
+                            <i class="bi bi-three-dots-vertical fs-5"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="#"><i class="bi bi-printer me-2"></i>چاپ</a></li>
+                            <li><a class="dropdown-item" href="settings.html"><i class="bi bi-gear me-2"></i>تنظیمات</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Side Menu -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="sideMenu">
+        <div class="offcanvas-header header-gradient">
+            <h5 class="offcanvas-title text-white">منو</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+            <ul class="nav nav-pills flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="index.html">
+                        <i class="bi bi-house me-2"></i>صفحه اصلی
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="add-product.html">
+                        <i class="bi bi-plus-circle me-2"></i>افزودن کالا
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="settings.html">
+                        <i class="bi bi-gear me-2"></i>تنظیمات
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="profile.html">
+                        <i class="bi bi-person me-2"></i>پروفایل
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Banner -->
+    <div class="container-fluid px-3 mt-3">
+        <div class="banner-card">
+            <div class="row align-items-center">
+                <div class="col-8">
+                    <h6 class="text-white fw-bold mb-1">برنامه حسابداری هیتاپ</h6>
+                    <p class="text-white-50 small mb-0">مدیریت کامل کسب و کار شما</p>
+                </div>
+                <div class="col-4 text-end">
+                    <div class="banner-icons">
+                        <i class="bi bi-laptop text-white-50 me-2"></i>
+                        <i class="bi bi-phone text-white-50"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="container-fluid px-3 mt-3">
+        <div class="row g-2">
+            <div class="col-auto">
+                <button class="btn btn-success btn-sm rounded-pill px-3" id="filterAll">همه</button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-secondary btn-sm rounded-pill px-3" id="filterDefault">دسته پیشفرض</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="container-fluid px-3 mt-3">
+        <div class="search-container">
+            <div class="input-group">
+                <input type="text" class="form-control search-input" placeholder="جست و جو کالا" id="searchInput">
+                <span class="input-group-text bg-transparent border-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Icons -->
+    <div class="container-fluid px-3 mt-3">
+        <div class="row justify-content-center g-3">
+            <div class="col-auto">
+                <button class="btn btn-outline-primary btn-sm rounded-circle p-2" id="qrScanner">
+                    <i class="bi bi-qr-code-scan"></i>
+                </button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-primary btn-sm rounded-circle p-2" id="listView">
+                    <i class="bi bi-list-ul"></i>
+                </button>
+            </div>
+            <div class="col-auto">
+                <button class="btn btn-outline-primary btn-sm rounded-circle p-2" id="gridView">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Products Container -->
+    <div class="container-fluid px-3 mt-4">
+        <div id="productsContainer">
+            <!-- Empty State -->
+            <div class="empty-state text-center py-5" id="emptyState">
+                <div class="empty-icon mb-3">
+                    <i class="bi bi-box text-muted" style="font-size: 4rem;"></i>
+                </div>
+                <h6 class="text-muted">کالایی یافت نشد</h6>
+                <p class="text-muted small">برای افزودن کالای جدید روی دکمه زیر کلیک کنید</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Add Button -->
+    <div class="floating-btn">
+        <a href="add-product.html" class="btn btn-primary btn-lg rounded-pill px-4 py-3 shadow">
+            <i class="bi bi-plus-lg me-2"></i>افزودن کالا
+        </a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

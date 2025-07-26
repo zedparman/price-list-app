@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>افزودن کالا - Smartwise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header-gradient">
+        <div class="container-fluid">
+            <div class="row align-items-center py-3">
+                <div class="col-2">
+                    <a href="index.html" class="btn btn-link text-white p-0">
+                        <i class="bi bi-arrow-right fs-4"></i>
+                    </a>
+                </div>
+                <div class="col-8 text-center">
+                    <h1 class="h5 text-white mb-0 fw-bold">افزودن کالا</h1>
+                </div>
+                <div class="col-2"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid px-3 py-4">
+        <form id="addProductForm">
+            <!-- Image Upload Section -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h6 class="card-title mb-3">تصویر محصول</h6>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="image-upload-card main-image">
+                                <input type="file" id="mainImage" accept="image/*" class="d-none">
+                                <label for="mainImage" class="image-upload-label">
+                                    <i class="bi bi-camera fs-1 text-muted mb-2"></i>
+                                    <p class="small text-muted mb-0">تصویر اصلی</p>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="image-upload-card">
+                                <input type="file" id="galleryImage" accept="image/*" class="d-none">
+                                <label for="galleryImage" class="image-upload-label">
+                                    <i class="bi bi-images fs-1 text-muted mb-2"></i>
+                                    <p class="small text-muted mb-0">گالری</p>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-2 mt-2">
+                        <div class="col-3">
+                            <div class="image-upload-card small-image">
+                                <i class="bi bi-plus text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="image-upload-card small-image">
+                                <i class="bi bi-plus text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="image-upload-card small-image">
+                                <i class="bi bi-plus text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="image-upload-card small-image">
+                                <i class="bi bi-plus text-muted"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Selection -->
+            <div class="mb-3">
+                <label class="form-label">دسته‌بندی</label>
+                <button type="button" class="btn btn-outline-primary w-100 text-start" data-bs-toggle="modal" data-bs-target="#categoryModal">
+                    <i class="bi bi-plus-circle me-2"></i>افزودن دسته بندی
+                </button>
+            </div>
+
+            <!-- Product Name -->
+            <div class="mb-3">
+                <label for="productName" class="form-label">نام کالا</label>
+                <input type="text" class="form-control form-input" id="productName" required>
+            </div>
+
+            <!-- Serial Number -->
+            <div class="mb-3">
+                <label for="serialNumber" class="form-label">شماره سریال</label>
+                <div class="input-group">
+                    <input type="text" class="form-control form-input" id="serialNumber">
+                    <button class="btn btn-outline-secondary" type="button">
+                        <i class="bi bi-qr-code"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quantity -->
+            <div class="mb-3">
+                <label for="quantity" class="form-label">مقدار/عدد</label>
+                <input type="number" class="form-control form-input" id="quantity" min="0" value="1">
+            </div>
+
+            <!-- Purchase Price -->
+            <div class="mb-4">
+                <label for="purchasePrice" class="form-label">قیمت خرید</label>
+                <div class="input-group">
+                    <input type="number" class="form-control form-input" id="purchasePrice" min="0">
+                    <span class="input-group-text">تومان</span>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill">
+                <i class="bi bi-floppy me-2"></i>افزودن به لیست
+            </button>
+        </form>
+    </div>
+
+    <!-- Category Modal -->
+    <div class="modal fade" id="categoryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">انتخاب دسته‌بندی</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group">
+                        <button type="button" class="list-group-item list-group-item-action" data-category="default">
+                            دسته پیشفرض
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-category="electronics">
+                            الکترونیک
+                        </button>
+                        <button type="button" class="list-group-item list-group-item-action" data-category="clothing">
+                            پوشاک
+                        </button>
+                    </div>
+                    <hr>
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="دسته جدید" id="newCategory">
+                        <button class="btn btn-primary" type="button" id="addCategory">افزودن</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
