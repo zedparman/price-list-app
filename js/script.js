@@ -5,9 +5,12 @@ let products = JSON.parse(localStorage.getItem('smartwise_products')) || [];
 let categories = JSON.parse(localStorage.getItem('smartwise_categories')) || ['دسته پیشفرض'];
 let currentView = 'grid'; // 'grid' or 'list'
 let currentFilter = 'all';
+let currentTheme = localStorage.getItem('smartwise_theme') || 'light';
+let notificationsEnabled = JSON.parse(localStorage.getItem('smartwise_notifications')) !== false;
 
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
+    applyTheme();
     initializeApp();
 });
 
@@ -37,6 +40,11 @@ function initializeApp() {
     initializeCommonFeatures();
 }
 
+// Apply Theme
+function applyTheme() {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+}
+
 // Get Current Page
 function getCurrentPage() {
     const path = window.location.pathname;
@@ -55,14 +63,19 @@ function initializeCommonFeatures() {
     // Add loading states to buttons
     document.querySelectorAll('.btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            if (!this.classList.contains('no-loading')) {
+            if (!this.classList.contains('no-loading') && this.type === 'submit') {
                 this.classList.add('loading');
                 setTimeout(() => {
                     this.classList.remove('loading');
-                }, 1000);
+                }, 2000);
             }
         });
     });
+    
+    // Initialize service worker for offline support
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').catch(console.error);
+    }
 }
 
 // Home Page Functions
@@ -102,6 +115,10 @@ function initializeHomePage() {
     
     // Load products
     loadProducts();
+    
+    // Initialize view state
+    updateViewButtons();
+    updateFilterButtons();
 }
 
 // Add Product Page Functions
@@ -126,6 +143,9 @@ function initializeAddProductPage() {
     
     // Category management
     initializeCategoryManagement();
+    
+    // Auto-generate serial number
+    generateSerialNumber();
 }
 
 // Edit Product Page Functions
@@ -171,6 +191,9 @@ function initializeEditProductPage() {
     
     // Initial calculation
     calculateFinalPrice();
+    
+    // Load product data if ID is provided
+    loadProductForEdit();
 }
 
 // Settings Page Functions
@@ -190,6 +213,9 @@ function initializeSettingsPage() {
     if (themeSelect) {
         themeSelect.addEventListener('change', handleThemeChange);
     }
+    
+    // Initialize backup/restore functionality
+    initializeDataManagement();
 }
 
 // Profile Page Functions
@@ -203,6 +229,9 @@ function initializeProfilePage() {
     if (twoFactorToggle) {
         twoFactorToggle.addEventListener('change', handleTwoFactorToggle);
     }
+    
+    // Load user stats
+    loadUserStats();
 }
 
 // Product Management Functions
@@ -226,6 +255,14 @@ function loadProducts() {
     }
     
     container.innerHTML = renderProducts(filteredProducts);
+    
+    // Add animation to cards
+    setTimeout(() => {
+        container.querySelectorAll('.card').forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('animate-slide-up');
+        });
+    }, 100);
 }
 
 function filterProducts() {
@@ -260,20 +297,21 @@ function renderProductsList(products) {
     return `
         <div class="list-group">
             ${products.map(product => `
-                <div class="list-group-item list-group-item-action">
+                <div class="list-group-item list-group-item-action" onclick="viewProduct('${product.id}')">
                     <div class="d-flex w-100 justify-content-between align-items-center">
                         <div class="flex-grow-1">
                             <h6 class="mb-1">${product.name}</h6>
                             <p class="mb-1 text-muted small">${product.serialNumber}</p>
-                            <small class="text-success">${formatPrice(product.salePrice)} تومان</small>
+                            <small class="text-success fw-bold">${formatPrice(product.salePrice)} تومان</small>
+                            ${product.discount > 0 ? `<span class="badge bg-warning ms-2">${product.discount}% تخفیف</span>` : ''}
                         </div>
                         <div class="text-end">
-                            <span class="badge bg-primary">${product.quantity}</span>
+                            <span class="badge bg-primary mb-2">${product.quantity} عدد</span>
                             <div class="btn-group btn-group-sm mt-2">
-                                <button class="btn btn-outline-primary" onclick="editProduct('${product.id}')">
+                                <button class="btn btn-outline-primary" onclick="editProduct('${product.id}')" title="ویرایش">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-outline-danger" onclick="deleteProduct('${product.id}')">
+                                <button class="btn btn-outline-danger" onclick="deleteProduct('${product.id}')" title="حذف">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -290,19 +328,24 @@ function renderProductsGrid(products) {
         <div class="row g-3">
             ${products.map(product => `
                 <div class="col-6 col-md-4 col-lg-3">
-                    <div class="card product-card">
+                    <div class="card product-card" onclick="viewProduct('${product.id}')">
                         <div class="card-body text-center">
                             <div class="product-image mb-2">
-                                <i class="bi bi-box text-muted" style="font-size: 2rem;"></i>
+                                ${product.image ? 
+                                    `<img src="${product.image}" alt="${product.name}" class="img-fluid rounded" style="width: 60px; height: 60px; object-fit: cover;">` :
+                                    `<i class="bi bi-box text-muted" style="font-size: 2rem;"></i>`
+                                }
                             </div>
-                            <h6 class="card-title small">${product.name}</h6>
-                            <p class="card-text text-muted small">${product.serialNumber}</p>
-                            <p class="text-success fw-bold">${formatPrice(product.salePrice)} تومان</p>
+                            <h6 class="card-title small mb-1" title="${product.name}">${truncateText(product.name, 20)}</h6>
+                            <p class="card-text text-muted small mb-1">${product.serialNumber}</p>
+                            <p class="text-success fw-bold mb-1">${formatPrice(product.salePrice)} تومان</p>
+                            ${product.discount > 0 ? `<span class="badge bg-warning mb-2">${product.discount}%</span>` : ''}
+                            <p class="text-muted small mb-2">موجودی: ${product.quantity}</p>
                             <div class="btn-group btn-group-sm w-100">
-                                <button class="btn btn-outline-primary" onclick="editProduct('${product.id}')">
+                                <button class="btn btn-outline-primary" onclick="editProduct('${product.id}')" title="ویرایش">
                                     <i class="bi bi-pencil"></i>
                                 </button>
-                                <button class="btn btn-outline-danger" onclick="deleteProduct('${product.id}')">
+                                <button class="btn btn-outline-danger" onclick="deleteProduct('${product.id}')" title="حذف">
                                     <i class="bi bi-trash"></i>
                                 </button>
                             </div>
@@ -321,30 +364,49 @@ function handleSearch(event) {
 
 function setFilter(filter) {
     currentFilter = filter;
-    
-    // Update UI
-    document.getElementById('filterAll').classList.toggle('btn-success', filter === 'all');
-    document.getElementById('filterAll').classList.toggle('btn-outline-secondary', filter !== 'all');
-    document.getElementById('filterDefault').classList.toggle('btn-success', filter === 'default');
-    document.getElementById('filterDefault').classList.toggle('btn-outline-secondary', filter !== 'default');
-    
+    updateFilterButtons();
     loadProducts();
 }
 
 function setView(view) {
     currentView = view;
-    
-    // Update UI
-    document.getElementById('listView').classList.toggle('btn-primary', view === 'list');
-    document.getElementById('listView').classList.toggle('btn-outline-primary', view !== 'list');
-    document.getElementById('gridView').classList.toggle('btn-primary', view === 'grid');
-    document.getElementById('gridView').classList.toggle('btn-outline-primary', view !== 'grid');
-    
+    updateViewButtons();
     loadProducts();
+    
+    // Save preference
+    localStorage.setItem('smartwise_view', view);
+}
+
+function updateFilterButtons() {
+    const filterAll = document.getElementById('filterAll');
+    const filterDefault = document.getElementById('filterDefault');
+    
+    if (filterAll && filterDefault) {
+        filterAll.className = currentFilter === 'all' ? 'btn btn-success btn-sm rounded-pill px-3 active' : 'btn btn-outline-secondary btn-sm rounded-pill px-3';
+        filterDefault.className = currentFilter === 'default' ? 'btn btn-success btn-sm rounded-pill px-3 active' : 'btn btn-outline-secondary btn-sm rounded-pill px-3';
+    }
+}
+
+function updateViewButtons() {
+    const listView = document.getElementById('listView');
+    const gridView = document.getElementById('gridView');
+    
+    if (listView && gridView) {
+        listView.className = currentView === 'list' ? 'btn btn-primary btn-sm rounded-circle p-2 active' : 'btn btn-outline-primary btn-sm rounded-circle p-2';
+        gridView.className = currentView === 'grid' ? 'btn btn-primary btn-sm rounded-circle p-2 active' : 'btn btn-outline-primary btn-sm rounded-circle p-2';
+    }
 }
 
 function handleQRScan() {
-    showToast('قابلیت اسکن QR در نسخه آینده اضافه خواهد شد', 'info');
+    // Simulate QR scanning
+    const qrButton = document.getElementById('qrScanner');
+    if (qrButton) {
+        qrButton.classList.add('animate-pulse');
+        setTimeout(() => {
+            qrButton.classList.remove('animate-pulse');
+            showToast('قابلیت اسکن QR در نسخه آینده اضافه خواهد شد', 'info');
+        }, 2000);
+    }
 }
 
 function handleAddProduct(event) {
@@ -358,7 +420,9 @@ function handleAddProduct(event) {
         quantity: parseInt(document.getElementById('quantity').value) || 1,
         purchasePrice: parseFloat(document.getElementById('purchasePrice').value) || 0,
         salePrice: parseFloat(document.getElementById('purchasePrice').value) * 1.2 || 0,
+        discount: 0,
         category: 'دسته پیشفرض',
+        image: null,
         createdAt: new Date().toISOString()
     };
     
@@ -371,6 +435,31 @@ function handleAddProduct(event) {
     setTimeout(() => {
         window.location.href = 'index.html';
     }, 1500);
+}
+
+function loadProductForEdit() {
+    const productId = getUrlParameter('id');
+    if (!productId) return;
+    
+    const product = products.find(p => p.id === productId);
+    if (!product) {
+        showToast('محصول یافت نشد', 'error');
+        setTimeout(() => window.location.href = 'index.html', 1500);
+        return;
+    }
+    
+    // Fill form with product data
+    document.getElementById('editProductName').value = product.name;
+    document.getElementById('editSerialNumber').value = product.serialNumber;
+    document.getElementById('editQuantity').value = product.quantity;
+    document.getElementById('editPurchasePrice').value = product.purchasePrice;
+    document.getElementById('discount').value = product.discount || 0;
+    
+    if (product.description) {
+        document.getElementById('description').value = product.description;
+    }
+    
+    calculateFinalPrice();
 }
 
 function handleEditProduct(event) {
@@ -411,14 +500,31 @@ function handleEditProduct(event) {
     }, 1500);
 }
 
+function generateSerialNumber() {
+    const serialInput = document.getElementById('serialNumber');
+    if (serialInput && !serialInput.value) {
+        const timestamp = Date.now().toString().slice(-6);
+        const random = Math.random().toString(36).substr(2, 4).toUpperCase();
+        serialInput.value = `SW${timestamp}${random}`;
+    }
+}
+
 function handleImageUpload(event) {
     const file = event.target.files[0];
     if (file) {
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+            showToast('حجم فایل نباید بیشتر از 5 مگابایت باشد', 'warning');
+            return;
+        }
+        
         const reader = new FileReader();
         reader.onload = function(e) {
             const label = event.target.nextElementSibling || event.target.previousElementSibling;
             if (label) {
-                label.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded" style="max-height: 80px;">`;
+                label.innerHTML = `
+                    <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 80px; object-fit: cover;">
+                    <p class="small text-success mt-2 mb-0">تصویر آپلود شد</p>
+                `;
             }
         };
         reader.readAsDataURL(file);
@@ -553,9 +659,90 @@ function handleNotificationToggle(event) {
 function handleThemeChange(event) {
     const settings = JSON.parse(localStorage.getItem('smartwise_settings')) || {};
     settings.theme = event.target.value;
+    currentTheme = event.target.value;
     localStorage.setItem('smartwise_settings', JSON.stringify(settings));
+    localStorage.setItem('smartwise_theme', currentTheme);
     
+    applyTheme();
     showToast(`تم "${event.target.value}" اعمال شد`, 'info');
+}
+
+// Data Management Functions
+function initializeDataManagement() {
+    const exportBtn = document.querySelector('[data-action="export"]');
+    const importBtn = document.querySelector('[data-action="import"]');
+    const clearBtn = document.querySelector('[data-action="clear"]');
+    
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportData);
+    }
+    if (importBtn) {
+        importBtn.addEventListener('click', importData);
+    }
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearAllData);
+    }
+}
+
+function exportData() {
+    const data = {
+        products,
+        categories,
+        settings: JSON.parse(localStorage.getItem('smartwise_settings')) || {},
+        exportDate: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `smartwise-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('داده‌ها با موفقیت صادر شد', 'success');
+}
+
+function importData() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.products && Array.isArray(data.products)) {
+                        products = data.products;
+                        saveProducts();
+                    }
+                    if (data.categories && Array.isArray(data.categories)) {
+                        categories = data.categories;
+                        saveCategories();
+                    }
+                    showToast('داده‌ها با موفقیت وارد شد', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } catch (error) {
+                    showToast('فایل نامعتبر است', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+    };
+    input.click();
+}
+
+function clearAllData() {
+    if (confirm('آیا از پاک کردن همه داده‌ها اطمینان دارید؟ این عمل قابل بازگشت نیست.')) {
+        localStorage.removeItem('smartwise_products');
+        localStorage.removeItem('smartwise_categories');
+        products = [];
+        categories = ['دسته پیشفرض'];
+        showToast('همه داده‌ها پاک شد', 'success');
+        setTimeout(() => location.reload(), 1500);
+    }
 }
 
 // Profile Functions
@@ -579,17 +766,51 @@ function handleTwoFactorToggle(event) {
     );
 }
 
+function loadUserStats() {
+    const totalProducts = products.length;
+    const totalValue = products.reduce((sum, product) => sum + (product.salePrice * product.quantity), 0);
+    const lowStockItems = products.filter(product => product.quantity < 5).length;
+    
+    // Update UI with stats if elements exist
+    const statsElements = {
+        totalProducts: document.querySelector('[data-stat="total-products"]'),
+        totalValue: document.querySelector('[data-stat="total-value"]'),
+        lowStock: document.querySelector('[data-stat="low-stock"]')
+    };
+    
+    if (statsElements.totalProducts) {
+        statsElements.totalProducts.textContent = totalProducts;
+    }
+    if (statsElements.totalValue) {
+        statsElements.totalValue.textContent = formatPrice(totalValue) + ' تومان';
+    }
+    if (statsElements.lowStock) {
+        statsElements.lowStock.textContent = lowStockItems;
+    }
+}
+
 // Global Functions
+function viewProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (product) {
+        // For now, redirect to edit page
+        editProduct(productId);
+    }
+}
+
 function editProduct(productId) {
     window.location.href = `edit-product.html?id=${productId}`;
 }
 
 function deleteProduct(productId) {
-    if (confirm('آیا از حذف این محصول اطمینان دارید؟')) {
+    event.stopPropagation(); // Prevent card click
+    
+    const product = products.find(p => p.id === productId);
+    if (confirm(`آیا از حذف "${product?.name}" اطمینان دارید؟`)) {
         products = products.filter(p => p.id !== productId);
         saveProducts();
         loadProducts();
-        showToast('محصول حذف شد', 'success');
+        showToast('محصول با موفقیت حذف شد', 'success');
     }
 }
 
@@ -600,6 +821,10 @@ function generateId() {
 
 function formatPrice(price) {
     return new Intl.NumberFormat('fa-IR').format(price);
+}
+
+function truncateText(text, maxLength) {
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
 }
 
 function debounce(func, wait) {
@@ -622,8 +847,11 @@ function getUrlParameter(name) {
 function showToast(message, type = 'info') {
     // Create toast element
     const toast = document.createElement('div');
-    toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
+    const bgClass = type === 'error' ? 'danger' : type === 'warning' ? 'warning' : type === 'success' ? 'success' : 'primary';
+    toast.className = `toast align-items-center text-white bg-${bgClass} border-0`;
     toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
     toast.innerHTML = `
         <div class="d-flex">
             <div class="toast-body">${message}</div>
@@ -649,6 +877,13 @@ function showToast(message, type = 'info') {
     toast.addEventListener('hidden.bs.toast', () => {
         toast.remove();
     });
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        if (document.contains(toast)) {
+            bsToast.hide();
+        }
+    }, 5000);
 }
 
 // Storage Functions
@@ -671,7 +906,10 @@ function loadSampleData() {
                 quantity: 5,
                 purchasePrice: 15000000,
                 salePrice: 18000000,
+                discount: 10,
                 category: 'الکترونیک',
+                description: 'لپ‌تاپ قدرتمند برای کار و بازی',
+                image: null,
                 createdAt: new Date().toISOString()
             },
             {
@@ -681,7 +919,23 @@ function loadSampleData() {
                 quantity: 10,
                 purchasePrice: 8000000,
                 salePrice: 9500000,
+                discount: 5,
                 category: 'الکترونیک',
+                description: 'گوشی هوشمند با دوربین عالی',
+                image: null,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 'sample3',
+                name: 'هدفون بلوتوثی Sony',
+                serialNumber: 'SONY003',
+                quantity: 15,
+                purchasePrice: 2000000,
+                salePrice: 2500000,
+                discount: 0,
+                category: 'الکترونیک',
+                description: 'هدفون بی‌سیم با کیفیت صدای عالی',
+                image: null,
                 createdAt: new Date().toISOString()
             }
         ];
@@ -689,8 +943,65 @@ function loadSampleData() {
     }
 }
 
-// Load sample data on first visit
-if (localStorage.getItem('smartwise_first_visit') === null) {
-    loadSampleData();
-    localStorage.setItem('smartwise_first_visit', 'false');
+// Initialize on first visit
+function initializeFirstVisit() {
+    if (localStorage.getItem('smartwise_first_visit') === null) {
+        loadSampleData();
+        localStorage.setItem('smartwise_first_visit', 'false');
+        
+        // Set default settings
+        const defaultSettings = {
+            notifications: true,
+            theme: 'light',
+            view: 'grid'
+        };
+        localStorage.setItem('smartwise_settings', JSON.stringify(defaultSettings));
+        
+        // Show welcome message
+        setTimeout(() => {
+            showToast('به Smartwise خوش آمدید! نمونه محصولات برای شما اضافه شده است.', 'success');
+        }, 1000);
+    }
+    
+    // Load saved preferences
+    currentView = localStorage.getItem('smartwise_view') || 'grid';
+    currentTheme = localStorage.getItem('smartwise_theme') || 'light';
 }
+
+// Load sample data on first visit
+initializeFirstVisit();
+
+// Keyboard shortcuts
+document.addEventListener('keydown', function(e) {
+    // Ctrl/Cmd + K for search
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.focus();
+        }
+    }
+    
+    // Escape to clear search
+    if (e.key === 'Escape') {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput && searchInput.value) {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+        }
+    }
+});
+
+// Performance monitoring
+window.addEventListener('load', function() {
+    if ('performance' in window) {
+        const loadTime = performance.now();
+        console.log(`Smartwise loaded in ${Math.round(loadTime)}ms`);
+    }
+});
+
+// Error handling
+window.addEventListener('error', function(e) {
+    console.error('Smartwise Error:', e.error);
+    showToast('خطایی رخ داده است. لطفاً صفحه را تازه‌سازی کنید.', 'error');
+});

@@ -1,5 +1,5 @@
 /* Import Persian Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* Root Variables */
 :root {
@@ -18,6 +18,17 @@
     --border-color: #e5e7eb;
     --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Dark Mode Variables */
+[data-theme="dark"] {
+    --light-bg: #111827;
+    --card-bg: #1f2937;
+    --input-bg: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    --border-color: #4b5563;
 }
 
 /* Base Styles */
@@ -43,7 +54,7 @@ body {
 
 /* Banner Card */
 .banner-card {
-    background: linear-gradient(135deg, #1e40af 0%, #7c2d12 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #7c3aed 100%);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
@@ -102,6 +113,16 @@ body {
 .card:hover {
     box-shadow: var(--shadow-lg);
     transform: translateY(-2px);
+}
+
+.product-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .card-header {
@@ -172,6 +193,18 @@ body {
 .floating-btn .btn:hover {
     transform: translateY(-3px);
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Product Image Placeholder */
+.product-image {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--input-bg) 0%, var(--border-color) 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }
 
 /* Empty State */
@@ -382,17 +415,62 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --light-bg: #111827;
-        --card-bg: #1f2937;
-        --input-bg: #374151;
-        --text-primary: #f9fafb;
-        --text-secondary: #d1d5db;
-        --text-muted: #9ca3af;
-        --border-color: #4b5563;
-    }
+/* Toast Notifications */
+.toast-container {
+    z-index: 1055;
+}
+
+/* View Toggle Buttons */
+.view-toggle .btn {
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.view-toggle .btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Filter Buttons */
+.filter-buttons .btn {
+    border-radius: 20px;
+    font-size: 13px;
+    padding: 8px 16px;
+}
+
+.filter-buttons .btn.active {
+    background-color: var(--success-color);
+    border-color: var(--success-color);
+    color: white;
+}
+
+/* QR Scanner Button */
+.qr-scanner-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.qr-scanner-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.5s ease;
+}
+
+.qr-scanner-btn:hover::before {
+    width: 100px;
+    height: 100px;
 }
 
 /* Print Styles */
@@ -412,5 +490,67 @@ body {
     body {
         background-color: white;
         color: black;
+    }
+}
+
+/* Smooth Transitions */
+* {
+    transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Custom Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.animate-slide-up {
+    animation: slideInUp 0.5s ease-out;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 576px) {
+    .banner-card {
+        padding: 12px;
+    }
+    
+    .banner-card h6 {
+        font-size: 14px;
+    }
+    
+    .banner-card p {
+        font-size: 12px;
+    }
+    
+    .search-input {
+        font-size: 16px; /* Prevents zoom on iOS */
+    }
+    
+    .product-card .card-body {
+        padding: 12px;
+    }
+    
+    .floating-btn .btn {
+        padding: 12px 20px;
+        font-size: 14px;
     }
 }

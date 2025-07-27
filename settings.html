@@ -55,10 +55,10 @@
                             <i class="bi bi-palette me-2 text-primary"></i>
                             <span>تم رنگی</span>
                         </div>
-                        <select class="form-select form-select-sm" style="width: auto;">
-                            <option>روشن</option>
-                            <option>تیره</option>
-                            <option>خودکار</option>
+                        <select class="form-select form-select-sm" style="width: auto;" id="themeSelect">
+                            <option value="light">روشن</option>
+                            <option value="dark">تیره</option>
+                            <option value="auto">خودکار</option>
                         </select>
                     </div>
                 </div>
@@ -113,21 +113,21 @@
             </div>
             <div class="card-body">
                 <div class="list-group list-group-flush">
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="list-group-item d-flex justify-content-between align-items-center" data-action="export">
                         <div>
                             <i class="bi bi-download me-2 text-success"></i>
                             <span>خروجی Excel</span>
                         </div>
                         <i class="bi bi-chevron-left text-muted"></i>
                     </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="list-group-item d-flex justify-content-between align-items-center" data-action="import">
                         <div>
                             <i class="bi bi-upload me-2 text-info"></i>
                             <span>وارد کردن داده‌ها</span>
                         </div>
                         <i class="bi bi-chevron-left text-muted"></i>
                     </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center text-danger">
+                    <div class="list-group-item d-flex justify-content-between align-items-center text-danger" data-action="clear">
                         <div>
                             <i class="bi bi-trash me-2"></i>
                             <span>پاک کردن همه داده‌ها</span>
